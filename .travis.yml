@@ -1,25 +1,49 @@
-language: java
-sudo: false
-
-before_install: "git clone -b travis `git config --get remote.origin.url` target/travis"
-script: "
-if [ ${TRAVIS_PULL_REQUEST} = 'false' ];
-then 
-    mvn clean deploy --settings target/travis/settings.xml; 
-else 
-    mvn clean verify --settings target/travis/settings.xml;
-fi"
-
-# whitelist
-branches:
-  only:
-    - develop
-
+addons:
+  artifacts:
+    debug: true
+    paths:
+    - libs.zip
+    - build.zip
+    - testbuild.zip
+    target_paths: 33e5dbf1-73ae-47f2-827b-3764a3557315
+after_success:
+- ./df-build.sh
+before_install:
+- git clone -b travis `git config --get remote.origin.url` target/travis
+- sed -i.bak -e 's|https://nexus.codehaus.org/snapshots/|https://oss.sonatype.org/content/repositories/codehaus-snapshots/|g'
+  $HOME/.m2/settings.xml
+branches: ''
+cache:
+  directories:
+  - $HOME/.m2
 env:
   global:
-    - secure: "SjYAaofkHceGoIuMsojSj0c6rJKPXF1IKkUzh7os7DprulAoL5bLivoawE+K\n011GZrP50cG1zWE8BvGTYtu3R9AUaWmmLbY7P2EfygplM3XGhzcMEK+CoS60\nJ/NaOsufOiKcqBrujrsnH2eS6y2qYIc7BicvfL14h9PovF2lRnw="
-    - secure: "Gg3XDKlwcGeLGqv/JjeDbHDpCU+MxyqDzR/HycZ0NRwjaqeJMbWpNcllr3m9\nC78+vKwTkcxD+A0pEZoDwJ0K78QB4TShH+0cUJjQ7Q4VZBFd3exaV2YvLysC\nChIaQZbBomJReZMNpDKhMKLqNdpn02Pnp3udyDRORUPLnk4g1KE="
+  - secure: 'SjYAaofkHceGoIuMsojSj0c6rJKPXF1IKkUzh7os7DprulAoL5bLivoawE+K
+
+      011GZrP50cG1zWE8BvGTYtu3R9AUaWmmLbY7P2EfygplM3XGhzcMEK+CoS60
+
+      J/NaOsufOiKcqBrujrsnH2eS6y2qYIc7BicvfL14h9PovF2lRnw='
+  - secure: 'Gg3XDKlwcGeLGqv/JjeDbHDpCU+MxyqDzR/HycZ0NRwjaqeJMbWpNcllr3m9
+
+      C78+vKwTkcxD+A0pEZoDwJ0K78QB4TShH+0cUJjQ7Q4VZBFd3exaV2YvLysC
+
+      ChIaQZbBomJReZMNpDKhMKLqNdpn02Pnp3udyDRORUPLnk4g1KE='
   matrix:
-   - LC_ALL=C
-   - LC_ALL=pl_PL
-   - LC_ALL_zh_CN
+  - LC_ALL=C
+  - LC_ALL=pl_PL
+  - LC_ALL_zh_CN
+jdk:
+- oraclejdk8
+language: java
+notifications:
+  webhooks:
+    on_failure: always
+    on_start: always
+    on_success: always
+    urls:
+    - http://insightsservice-stg.us-east-1.elasticbeanstalk.com/travisWebHookListener?build_id=33e5dbf1-73ae-47f2-827b-3764a3557315
+script: ' if [ ${TRAVIS_PULL_REQUEST} = ''false'' ]; then mvn clean deploy --settings
+  target/travis/settings.xml; else mvn clean verify --settings target/travis/settings.xml;
+  fi'
+sudo: false
+# Modified by Insights Service at 2016-08-07 12:27:25.403117
